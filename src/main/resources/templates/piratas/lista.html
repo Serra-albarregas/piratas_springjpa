@@ -23,11 +23,30 @@
         <label>Recompensa mínima (฿)
             <input type="number" name="recompensaMin" min="0" step="1000" th:value="${recompensaMin}">
         </label>
+        <label>Ordenar por
+            <select name="orden">
+                <option value="recompensa" th:selected="${orden == 'recompensa'}">Recompensa</option>
+                <option value="nombre" th:selected="${orden == 'nombre'}">Nombre</option>
+                <option value="tripulacion" th:selected="${orden == 'tripulacion'}">Tripulación</option>
+            </select>
+        </label>
+        <label>Sentido
+            <select name="dir">
+                <option value="desc" th:selected="${dir == 'desc'}">Descendente</option>
+                <option value="asc" th:selected="${dir == 'asc'}">Ascendente</option>
+            </select>
+        </label>
+        <label>Por página
+            <select name="size">
+                <option th:each="t : ${tamanos}" th:value="${t}" th:text="${t}" th:selected="${t == size}"></option>
+            </select>
+        </label>
         <button class="boton" type="submit">Buscar</button>
         <a class="boton boton-sec" th:href="@{/piratas}">Limpiar</a>
     </form>
 
-    <p class="contador" th:text="${piratas.size()} + ' pirata(s) encontrado(s)'"></p>
+    <p class="contador"
+       th:text="|${pagina.totalElements} pirata(s) · página ${pagina.number + 1} de ${pagina.totalPages == 0 ? 1 : pagina.totalPages}|"></p>
 
     <section class="carteles">
         <a class="cartel" th:each="p : ${piratas}" th:href="@{/piratas/{id}(id=${p.id})}">
@@ -40,6 +59,25 @@
     </section>
 
     <p class="vacio" th:if="${piratas.isEmpty()}">Ningún pirata coincide con esa búsqueda. ¡El mar es muy grande!</p>
+
+    <nav class="paginacion" th:if="${pagina.totalPages > 1}" aria-label="Paginación">
+        <a th:if="${pagina.hasPrevious()}" th:href="@{${urlBase + 0}}" title="Primera">«</a>
+        <span th:unless="${pagina.hasPrevious()}" class="desactivado">«</span>
+
+        <a th:if="${pagina.hasPrevious()}" th:href="@{${urlBase + (pagina.number - 1)}}">‹ Anterior</a>
+        <span th:unless="${pagina.hasPrevious()}" class="desactivado">‹ Anterior</span>
+
+        <th:block th:each="i : ${#numbers.sequence(inicioVentana, finVentana)}">
+            <span th:if="${i == pagina.number}" class="actual" th:text="${i + 1}">1</span>
+            <a th:unless="${i == pagina.number}" th:href="@{${urlBase + i}}" th:text="${i + 1}">2</a>
+        </th:block>
+
+        <a th:if="${pagina.hasNext()}" th:href="@{${urlBase + (pagina.number + 1)}}">Siguiente ›</a>
+        <span th:unless="${pagina.hasNext()}" class="desactivado">Siguiente ›</span>
+
+        <a th:if="${pagina.hasNext()}" th:href="@{${urlBase + (pagina.totalPages - 1)}}" title="Última">»</a>
+        <span th:unless="${pagina.hasNext()}" class="desactivado">»</span>
+    </nav>
 </main>
 </body>
 </html>

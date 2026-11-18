@@ -155,6 +155,29 @@ a.cartel:hover { transform: rotate(-1.5deg) scale(1.03); }
 .acciones { display: flex; gap: .8rem; flex-wrap: wrap; }
 .formulario .boton-sec { color: var(--tinta); border-color: var(--tinta); }
 
+/* Paginación */
+.paginacion {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin-top: 2rem;
+}
+.paginacion a,
+.paginacion span {
+    min-width: 2.4rem;
+    padding: .45rem .8rem;
+    text-align: center;
+    font-weight: 700;
+    border: 2px solid var(--paja);
+    border-radius: .4rem;
+}
+.paginacion a { color: var(--paja); }
+.paginacion a:hover { background: rgba(244, 196, 48, .2); }
+.paginacion .actual { background: var(--paja); color: var(--tinta); border-color: var(--tinta); }
+.paginacion .desactivado { opacity: .35; border-style: dashed; }
+
 @media (max-width: 600px) {
     .titulo { font-size: 2.2rem; }
 }
