@@ -14,10 +14,10 @@
             <input type="text" name="nombre" th:value="${nombre}" placeholder="Luffy…">
         </label>
         <label>Tripulación
-            <select name="tripulacion">
+            <select name="tripulacionId">
                 <option value="">Todas</option>
-                <option th:each="t : ${tripulaciones}" th:value="${t}" th:text="${t}"
-                        th:selected="${t == tripulacion}"></option>
+                <option th:each="t : ${tripulaciones}" th:value="${t.id}" th:text="${t.nombre}"
+                        th:selected="${t.id == tripulacionId}"></option>
             </select>
         </label>
         <label>Recompensa mínima (฿)
@@ -53,7 +53,8 @@
             <span class="cartel-wanted">WANTED</span>
             <div class="cartel-foto"><span th:text="${#strings.substring(p.nombre, 0, 1)}">M</span></div>
             <h2 th:text="${p.nombre}">Nombre</h2>
-            <p class="cartel-tripulacion" th:text="${p.tripulacion}">Tripulación</p>
+            <p class="cartel-tripulacion" th:text="${p.tripulacion.nombre}">Tripulación</p>
+            <p class="cartel-fruta" th:if="${p.fruta != null}"><span class="insignia" th:text="${p.fruta.tipo.etiqueta}">Logia</span></p>
             <p class="cartel-recompensa" th:text="${#numbers.formatInteger(p.recompensa, 1, 'POINT')} + ' ฿'">0 ฿</p>
         </a>
     </section>

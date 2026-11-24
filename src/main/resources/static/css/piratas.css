@@ -150,7 +150,7 @@ a.cartel:hover { transform: rotate(-1.5deg) scale(1.03); }
 }
 .campo { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1rem; }
 .campo label { font-weight: 700; }
-.campo.con-error input, .campo.con-error textarea { border-color: var(--rojo); }
+.campo.con-error input, .campo.con-error select, .campo.con-error textarea { border-color: var(--rojo); }
 .error { color: var(--rojo); font-weight: 700; }
 .acciones { display: flex; gap: .8rem; flex-wrap: wrap; }
 .formulario .boton-sec { color: var(--tinta); border-color: var(--tinta); }
@@ -177,6 +177,53 @@ a.cartel:hover { transform: rotate(-1.5deg) scale(1.03); }
 .paginacion a:hover { background: rgba(244, 196, 48, .2); }
 .paginacion .actual { background: var(--paja); color: var(--tinta); border-color: var(--tinta); }
 .paginacion .desactivado { opacity: .35; border-style: dashed; }
+
+/* Relaciones: insignias, tablas, paneles y listas */
+.insignia {
+    display: inline-block;
+    padding: .1rem .7rem;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--pergamino);
+    background: var(--rojo);
+    border: 2px solid var(--tinta);
+    border-radius: 1rem;
+}
+.cartel-fruta { margin: .5rem 0 0; }
+.subtitulo { max-width: 700px; margin: -.5rem auto 1.5rem; text-align: center; font-style: italic; opacity: .9; }
+
+.tabla-envoltorio { overflow-x: auto; }
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--tinta);
+    background: var(--pergamino);
+    border: 6px double var(--tinta);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .45);
+}
+.tabla th, .tabla td { padding: .6rem .9rem; text-align: left; border-bottom: 1px solid var(--pergamino-oscuro); }
+.tabla th { font-family: var(--fuente-titulo); font-size: 1.2rem; letter-spacing: .05em; background: var(--pergamino-oscuro); }
+.tabla tbody tr:hover { background: rgba(244, 196, 48, .25); }
+
+.paneles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.panel {
+    padding: 1rem 1.5rem;
+    color: var(--tinta);
+    background: var(--pergamino);
+    border: 6px double var(--tinta);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .45);
+}
+.panel h2 { margin: 0 0 .5rem; font-family: var(--fuente-titulo); letter-spacing: .05em; }
+.panel-centrado { max-width: 560px; margin: 0 auto 2rem; }
+
+.lista-simple { margin: 0; padding: 0; list-style: none; }
+.lista-simple li { display: flex; justify-content: space-between; gap: 1rem; padding: .3rem 0; border-bottom: 1px dashed var(--pergamino-oscuro); }
+.dato { font-weight: 700; }
+
+.tabla a, .panel a, .ficha a { font-weight: 700; text-decoration: underline; }
+.tabla a:hover, .panel a:hover, .ficha a:hover { color: var(--rojo); }
 
 @media (max-width: 600px) {
     .titulo { font-size: 2.2rem; }

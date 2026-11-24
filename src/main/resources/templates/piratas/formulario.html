@@ -16,16 +16,25 @@
             <small class="error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></small>
         </div>
 
+        <!-- El <select> envía el id; WebConfig lo convierte en el objeto Tripulacion (Formatter) -->
         <div class="campo" th:classappend="${#fields.hasErrors('tripulacion')} ? 'con-error'">
             <label for="tripulacion">Tripulación</label>
-            <input id="tripulacion" type="text" th:field="*{tripulacion}">
+            <select id="tripulacion" th:field="*{tripulacion}">
+                <option value="">— Elige una tripulación —</option>
+                <option th:each="t : ${tripulaciones}" th:value="${t.id}" th:text="${t.nombre}"></option>
+            </select>
             <small class="error" th:if="${#fields.hasErrors('tripulacion')}" th:errors="*{tripulacion}"></small>
         </div>
 
-        <div class="campo" th:classappend="${#fields.hasErrors('frutaDelDiablo')} ? 'con-error'">
-            <label for="frutaDelDiablo">Fruta del Diablo (opcional)</label>
-            <input id="frutaDelDiablo" type="text" th:field="*{frutaDelDiablo}">
-            <small class="error" th:if="${#fields.hasErrors('frutaDelDiablo')}" th:errors="*{frutaDelDiablo}"></small>
+        <!-- Solo se ofrecen las frutas sin dueño: la relación es uno a uno -->
+        <div class="campo" th:classappend="${#fields.hasErrors('fruta')} ? 'con-error'">
+            <label for="fruta">Fruta del Diablo (opcional)</label>
+            <select id="fruta" th:field="*{fruta}">
+                <option value="">Ninguna</option>
+                <option th:each="f : ${frutas}" th:value="${f.id}"
+                        th:text="|${f.nombre} (${f.tipo.etiqueta})|"></option>
+            </select>
+            <small class="error" th:if="${#fields.hasErrors('fruta')}" th:errors="*{fruta}"></small>
         </div>
 
         <div class="campo" th:classappend="${#fields.hasErrors('recompensa')} ? 'con-error'">

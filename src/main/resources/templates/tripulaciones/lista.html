@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Tripulaciones')}"></head>
+<body>
+<header th:replace="~{fragments :: cabecera}"></header>
+
+<main class="contenedor">
+    <h1 class="titulo">Tripulaciones</h1>
+
+    <div class="tabla-envoltorio">
+        <table class="tabla">
+            <thead>
+                <tr>
+                    <th>Tripulación</th>
+                    <th>Descripción</th>
+                    <th>Piratas</th>
+                    <th>Territorios</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- t.piratas y t.territorios son colecciones LAZY: se piden a la base de datos al recorrerlas,
+                     una consulta por tripulación (problema N+1). Míralo en la consola con show-sql. -->
+                <tr th:each="t : ${tripulaciones}">
+                    <td><a th:href="@{/tripulaciones/{id}(id=${t.id})}" th:text="${t.nombre}">Tripulación</a></td>
+                    <td th:text="${t.descripcion}">Descripción</td>
+                    <td th:text="${#lists.size(t.piratas)}">0</td>
+                    <td th:text="${t.territorios.size()}">0</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

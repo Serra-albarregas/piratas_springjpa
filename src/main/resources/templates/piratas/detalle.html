@@ -13,9 +13,23 @@
 
         <dl class="ficha">
             <dt>Tripulación</dt>
-            <dd th:text="${pirata.tripulacion}">Tripulación</dd>
+            <dd>
+                <a th:href="@{/tripulaciones/{id}(id=${pirata.tripulacion.id})}"
+                   th:text="${pirata.tripulacion.nombre}">Tripulación</a>
+            </dd>
+            <dt>Territorios de su tripulación</dt>
+            <dd>
+                <ul class="lista-simple" th:unless="${pirata.tripulacion.territorios.isEmpty()}">
+                    <li th:each="territorio : ${pirata.tripulacion.territorios}">
+                        <a th:href="@{/territorios/{id}(id=${territorio.id})}" th:text="${territorio.nombre}">Territorio</a>
+                    </li>
+                </ul>
+                <span th:if="${pirata.tripulacion.territorios.isEmpty()}">Ninguno</span>
+            </dd>
             <dt>Fruta del Diablo</dt>
-            <dd th:text="${#strings.isEmpty(pirata.frutaDelDiablo)} ? 'Ninguna' : ${pirata.frutaDelDiablo}">Ninguna</dd>
+            <dd th:if="${pirata.fruta != null}"
+                th:text="|${pirata.fruta.nombre} (${pirata.fruta.tipo.etiqueta})|">Gomu Gomu no Mi (Paramecia)</dd>
+            <dd th:if="${pirata.fruta == null}">Ninguna</dd>
             <dt>Descripción</dt>
             <dd th:text="${#strings.isEmpty(pirata.descripcion)} ? 'Sin datos' : ${pirata.descripcion}">Sin datos</dd>
         </dl>

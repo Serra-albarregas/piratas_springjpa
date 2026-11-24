@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head(${territorio.nombre})}"></head>
+<body>
+<header th:replace="~{fragments :: cabecera}"></header>
+
+<main class="contenedor">
+    <h1 class="titulo" th:text="${territorio.nombre}">Territorio</h1>
+    <p class="subtitulo" th:if="${territorio.descripcion != null}" th:text="${territorio.descripcion}">Descripción</p>
+
+    <section class="panel panel-centrado">
+        <h2>Tripulaciones que lo dominan (<span th:text="${territorio.tripulaciones.size()}">0</span>)</h2>
+        <!-- Lado inverso del muchos a muchos: territorio.tripulaciones -->
+        <ul class="lista-simple" th:unless="${territorio.tripulaciones.isEmpty()}">
+            <li th:each="t : ${territorio.tripulaciones}">
+                <a th:href="@{/tripulaciones/{id}(id=${t.id})}" th:text="${t.nombre}">Tripulación</a>
+            </li>
+        </ul>
+        <p th:if="${territorio.tripulaciones.isEmpty()}">Ninguna tripulación domina este territorio.</p>
+    </section>
+
+    <p class="centrado"><a class="boton boton-sec" th:href="@{/territorios}">← Volver a los territorios</a></p>
+</main>
+</body>
+</html>

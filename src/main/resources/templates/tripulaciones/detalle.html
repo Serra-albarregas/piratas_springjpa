@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head(${tripulacion.nombre})}"></head>
+<body>
+<header th:replace="~{fragments :: cabecera}"></header>
+
+<main class="contenedor">
+    <h1 class="titulo" th:text="${tripulacion.nombre}">Tripulación</h1>
+    <p class="subtitulo" th:if="${tripulacion.descripcion != null}" th:text="${tripulacion.descripcion}">Descripción</p>
+
+    <div class="paneles">
+        <section class="panel">
+            <h2>Piratas (<span th:text="${#lists.size(tripulacion.piratas)}">0</span>)</h2>
+            <!-- Lado inverso del uno a muchos: tripulacion.piratas, ordenados por recompensa -->
+            <ul class="lista-simple" th:unless="${#lists.isEmpty(tripulacion.piratas)}">
+                <li th:each="p : ${tripulacion.piratas}">
+                    <a th:href="@{/piratas/{id}(id=${p.id})}" th:text="${p.nombre}">Pirata</a>
+                    <span class="dato" th:text="${#numbers.formatInteger(p.recompensa, 1, 'POINT')} + ' ฿'">0 ฿</span>
+                </li>
+            </ul>
+            <p th:if="${#lists.isEmpty(tripulacion.piratas)}">Esta tripulación no tiene piratas.</p>
+        </section>
+
+        <section class="panel">
+            <h2>Territorios que domina (<span th:text="${tripulacion.territorios.size()}">0</span>)</h2>
+            <!-- Lado propietario del muchos a muchos: tripulacion.territorios -->
+            <ul class="lista-simple" th:unless="${tripulacion.territorios.isEmpty()}">
+                <li th:each="te : ${tripulacion.territorios}">
+                    <a th:href="@{/territorios/{id}(id=${te.id})}" th:text="${te.nombre}">Territorio</a>
+                </li>
+            </ul>
+            <p th:if="${tripulacion.territorios.isEmpty()}">No domina ningún territorio.</p>
+        </section>
+    </div>
+
+    <p class="centrado"><a class="boton boton-sec" th:href="@{/tripulaciones}">← Volver a las tripulaciones</a></p>
+</main>
+</body>
+</html>
