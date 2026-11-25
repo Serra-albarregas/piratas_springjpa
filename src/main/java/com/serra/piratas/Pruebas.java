@@ -17,7 +17,7 @@ public class Pruebas implements CommandLineRunner {
     private final PirataRepository pirataRepository;
 
     @Override
-    //@Transactional
+    @Transactional
     public void run(String... args) {
 
         System.out.println("===========PRUEBAS===========");

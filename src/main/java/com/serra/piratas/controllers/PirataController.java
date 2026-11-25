@@ -1,35 +1,36 @@
 package com.serra.piratas.controllers;
 
+import com.serra.piratas.dto.PirataForm;
 import com.serra.piratas.entities.Pirata;
-import com.serra.piratas.repositories.FrutaDelDiabloRepository;
-import com.serra.piratas.repositories.PirataRepository;
-import com.serra.piratas.repositories.TripulacionRepository;
+import com.serra.piratas.services.FrutaDelDiabloService;
+import com.serra.piratas.services.PirataService;
+import com.serra.piratas.services.TripulacionService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Map;
 
+// El controlador recibe SERVICIOS, no repositorios: solo lee parámetros, valida el formulario
+// y elige la vista. La lógica de negocio y las transacciones viven en la capa de servicio.
 @Controller
 @RequestMapping("/piratas")
 @AllArgsConstructor
 public class PirataController {
 
-    private final PirataRepository repo;
-    private final TripulacionRepository tripulacionRepo;
-    private final FrutaDelDiabloRepository frutaRepo;
+    private final PirataService pirataService;
+    private final TripulacionService tripulacionService;
+    private final FrutaDelDiabloService frutaService;
 
     // Nombre que llega por la URL -> propiedad por la que se ordena.
     // La tripulación ya no es un texto sino una entidad: se ordena por su nombre.
@@ -58,13 +59,11 @@ public class PirataController {
 
         // 2. Orden estable: desempate por id para que no se repitan ni se salten filas entre páginas
         Sort sort = Sort.by(direccion, CAMPOS_ORDEN.get(campo)).and(Sort.by(Sort.Direction.ASC, "id"));
-        Page<Pirata> pagina = repo.filtrar(nombre, tripulacionId, recompensaMin, PageRequest.of(page, size, sort));
+        Page<Pirata> pagina = pirataService.filtrar(nombre, tripulacionId, recompensaMin,
+                PageRequest.of(page, size, sort));
 
-        // 3. Si piden una página que ya no existe (p. ej. al filtrar desde la página 3), vamos a la última
-        if (pagina.getTotalPages() > 0 && page >= pagina.getTotalPages()) {
-            page = pagina.getTotalPages() - 1;
-            pagina = repo.filtrar(nombre, tripulacionId, recompensaMin, PageRequest.of(page, size, sort));
-        }
+        // 3. El servicio ya ha corregido la página si no existía: usamos la que realmente devuelve
+        page = pagina.getNumber();
 
         // 4. URL base con todos los filtros (menos la página) para construir los enlaces de la paginación
         String dirTexto = direccion.name().toLowerCase();
@@ -77,11 +76,10 @@ public class PirataController {
             uri.queryParam("recompensaMin", recompensaMin);
         uri.queryParam("orden", campo).queryParam("dir", dirTexto).queryParam("size", size);
 
-        // 5. Añadir todos los datos al modelo, en este ejemplo mandamos la página y los piratas por separado, pero
-        // podríamos simplemente añadir la página y usar getContent() en la plantilla para recorrer la colección
+        // 5. Añadir todos los datos al modelo
         model.addAttribute("pagina", pagina);
         model.addAttribute("piratas", pagina.getContent());
-        model.addAttribute("tripulaciones", tripulacionRepo.findAllByOrderByNombreAsc());
+        model.addAttribute("tripulaciones", tripulacionService.listarParaSelect());
         model.addAttribute("nombre", nombre);
         model.addAttribute("tripulacionId", tripulacionId);
         model.addAttribute("recompensaMin", recompensaMin);
@@ -97,53 +95,47 @@ public class PirataController {
 
     @GetMapping("/{id}")
     public String detalle(@PathVariable Long id, Model model) {
-        // La tripulación, la fruta y los territorios son LAZY: se cargan al usarlos en la plantilla
-        // (funciona porque Spring Boot mantiene la sesión abierta mientras se genera la vista)
-        Pirata pirata = repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pirata no encontrado"));
-        model.addAttribute("pirata", pirata);
+        // Si no existe, el servicio lanza RecursoNoEncontradoException y Spring responde con un 404
+        model.addAttribute("pirata", pirataService.obtener(id));
         return "piratas/detalle";
     }
 
     @GetMapping("/nuevo")
     public String nuevo(Model model) {
-        model.addAttribute("pirata", new Pirata());
+        model.addAttribute("pirata", new PirataForm());
         cargarOpciones(model);
         return "piratas/formulario";
     }
 
+    // Recibe un DTO de formulario (PirataForm), no la entidad
     @PostMapping
-    public String guardar(@Valid @ModelAttribute("pirata") Pirata pirata,
+    public String guardar(@Valid @ModelAttribute("pirata") PirataForm form,
             BindingResult result,
             Model model,
             RedirectAttributes flash) {
 
         // Reglas que Bean Validation no puede comprobar porque necesitan consultar la base de datos.
         // Se informan como errores de campo, igual que los de las anotaciones.
-        if (!result.hasFieldErrors("nombre")) {
-            pirata.setNombre(pirata.getNombre().trim());
-            if (repo.findByNombreIgnoreCase(pirata.getNombre()).isPresent()) {
-                result.rejectValue("nombre", "duplicado", "Ya existe un pirata con ese nombre");
-            }
+        if (!result.hasFieldErrors("nombre") && pirataService.existeNombre(form.getNombre().trim())) {
+            result.rejectValue("nombre", "duplicado", "Ya existe un pirata con ese nombre");
         }
-        // La columna fruta_id es única (uno a uno): una fruta solo puede tener un dueño
-        if (pirata.getFruta() != null && repo.existsByFruta(pirata.getFruta())) {
-            result.rejectValue("fruta", "ocupada", "Esa Fruta del Diablo ya tiene dueño");
+        if (form.getFrutaId() != null && pirataService.frutaOcupada(form.getFrutaId())) {
+            result.rejectValue("frutaId", "ocupada", "Esa Fruta del Diablo ya tiene dueño");
         }
 
         if (result.hasErrors()) {
             cargarOpciones(model);
             return "piratas/formulario";
         }
-        repo.save(pirata);
-        flash.addFlashAttribute("mensaje", "¡" + pirata.getNombre() + " se ha hecho a la mar!");
+        Pirata creado = pirataService.crear(form);
+        flash.addFlashAttribute("mensaje", "¡" + creado.getNombre() + " se ha hecho a la mar!");
         return "redirect:/piratas";
     }
 
     // Datos para los <select> del formulario
     private void cargarOpciones(Model model) {
-        model.addAttribute("tripulaciones", tripulacionRepo.findAllByOrderByNombreAsc());
-        model.addAttribute("frutas", frutaRepo.buscarLibres());
+        model.addAttribute("tripulaciones", tripulacionService.listarParaSelect());
+        model.addAttribute("frutas", frutaService.listarLibres());
     }
 
     private boolean vacio(String s) {

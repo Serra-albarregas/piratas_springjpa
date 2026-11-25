@@ -16,25 +16,25 @@
             <small class="error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></small>
         </div>
 
-        <!-- El <select> envía el id; WebConfig lo convierte en el objeto Tripulacion (Formatter) -->
-        <div class="campo" th:classappend="${#fields.hasErrors('tripulacion')} ? 'con-error'">
-            <label for="tripulacion">Tripulación</label>
-            <select id="tripulacion" th:field="*{tripulacion}">
+        <!-- El formulario trabaja con un DTO (PirataForm): el <select> guarda el ID de la tripulación -->
+        <div class="campo" th:classappend="${#fields.hasErrors('tripulacionId')} ? 'con-error'">
+            <label for="tripulacionId">Tripulación</label>
+            <select id="tripulacionId" th:field="*{tripulacionId}">
                 <option value="">— Elige una tripulación —</option>
                 <option th:each="t : ${tripulaciones}" th:value="${t.id}" th:text="${t.nombre}"></option>
             </select>
-            <small class="error" th:if="${#fields.hasErrors('tripulacion')}" th:errors="*{tripulacion}"></small>
+            <small class="error" th:if="${#fields.hasErrors('tripulacionId')}" th:errors="*{tripulacionId}"></small>
         </div>
 
         <!-- Solo se ofrecen las frutas sin dueño: la relación es uno a uno -->
-        <div class="campo" th:classappend="${#fields.hasErrors('fruta')} ? 'con-error'">
-            <label for="fruta">Fruta del Diablo (opcional)</label>
-            <select id="fruta" th:field="*{fruta}">
+        <div class="campo" th:classappend="${#fields.hasErrors('frutaId')} ? 'con-error'">
+            <label for="frutaId">Fruta del Diablo (opcional)</label>
+            <select id="frutaId" th:field="*{frutaId}">
                 <option value="">Ninguna</option>
                 <option th:each="f : ${frutas}" th:value="${f.id}"
                         th:text="|${f.nombre} (${f.tipo.etiqueta})|"></option>
             </select>
-            <small class="error" th:if="${#fields.hasErrors('fruta')}" th:errors="*{fruta}"></small>
+            <small class="error" th:if="${#fields.hasErrors('frutaId')}" th:errors="*{frutaId}"></small>
         </div>
 
         <div class="campo" th:classappend="${#fields.hasErrors('recompensa')} ? 'con-error'">

@@ -12,7 +12,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.serra.piratas.dto.PirataResumen;
 import com.serra.piratas.dto.ResumenTripulacion;
@@ -149,15 +148,15 @@ public interface PirataRepository extends JpaRepository<Pirata, Long> {
                 """)
         List<PirataResumen> listarResumenes();
 
-        // ── 2.8 Modificaciones: @Modifying + @Transactional ──
-        @Transactional
+        // ── 2.8 Modificaciones: @Modifying ──
+        // Ya NO llevan @Transactional (página 10): la transacción se abre en el servicio.
+        // Llamados directamente, sin transacción, lanzan TransactionRequiredException.
         @Modifying(clearAutomatically = true, flushAutomatically = true)
         // Se compara con la ENTIDAD (p.tripulacion = :tripulacion), sin recorrer la relación dentro del UPDATE
         @Query("UPDATE Pirata p SET p.recompensa = p.recompensa + :incremento WHERE p.tripulacion = :tripulacion")
         int subirRecompensaTripulacion(@Param("tripulacion") Tripulacion tripulacion,
                         @Param("incremento") Long incremento);
 
-        @Transactional
         @Modifying
         @Query("DELETE FROM Pirata p WHERE p.recompensa < :min")
         int eliminarConRecompensaMenorQue(@Param("min") Long min);
@@ -198,7 +197,7 @@ public interface PirataRepository extends JpaRepository<Pirata, Long> {
 
         // endregion
 
-        // region relaciones
+        // region relaciones (teoría: páginas 8 y 9)
 
         // ── R1. UNO A MUCHOS: derivadas que atraviesan la relación @ManyToOne ──
         // findByTripulacionNombre se interpreta como p.tripulacion.nombre
@@ -227,6 +226,8 @@ public interface PirataRepository extends JpaRepository<Pirata, Long> {
         // ── R3. UNO A UNO: la fruta del diablo ──
         boolean existsByFruta(FrutaDelDiablo fruta);
 
+        boolean existsByFrutaId(Long frutaId);
+
         List<Pirata> findByFrutaTipo(TipoFruta tipo);
 
         @Query("select p from Pirata p join p.fruta f where f.tipo = :tipo order by p.recompensa desc")
@@ -244,6 +245,23 @@ public interface PirataRepository extends JpaRepository<Pirata, Long> {
                 order by p.nombre
                 """)
         List<Pirata> buscarPorTerritorio(@Param("territorio") String territorio);
+
+        // ── R6. Servicios y transacciones (página 10) ──
+        // Derivada de borrado: necesita una transacción activa (la abre el servicio).
+        // Borra uno a uno los piratas encontrados y devuelve cuántos ha borrado.
+        long deleteByTripulacionId(Long tripulacionId);
+
+        // Ficha completa de un pirata en UNA consulta: tripulación, territorios de su tripulación y fruta.
+        // Con open-in-view=false, la plantilla no puede cargar nada perezosamente:
+        // el servicio debe devolver todo lo que la vista necesita ya cargado.
+        @Query("""
+                select p from Pirata p
+                join fetch p.tripulacion t
+                left join fetch t.territorios
+                left join fetch p.fruta
+                where p.id = :id
+                """)
+        Optional<Pirata> buscarConDetalle(@Param("id") Long id);
 
         // ── R5. N+1: pedir la relación DENTRO de la misma consulta ──
         @Query("select p from Pirata p join fetch p.tripulacion order by p.nombre")

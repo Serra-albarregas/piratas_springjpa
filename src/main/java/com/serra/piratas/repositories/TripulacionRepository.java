@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.serra.piratas.dto.TripulacionResumen;
 import com.serra.piratas.entities.Tripulacion;
 
 public interface TripulacionRepository extends JpaRepository<Tripulacion, Long> {
@@ -36,4 +37,14 @@ public interface TripulacionRepository extends JpaRepository<Tripulacion, Long> 
         // Lo mismo con @EntityGraph, sin escribir JPQL
         @EntityGraph(attributePaths = { "territorios" })
         List<Tripulacion> findDistinctByOrderByNombreAsc();
+
+        // ── DTO de salida con los recuentos calculados en la propia consulta (página 10):
+        // una sola consulta para todo el listado, sin cargar colecciones.
+        @Query("""
+                select new com.serra.piratas.dto.TripulacionResumen(
+                        t.id, t.nombre, t.descripcion, size(t.piratas), size(t.territorios))
+                from Tripulacion t
+                order by t.nombre
+                """)
+        List<TripulacionResumen> listarResumen();
 }

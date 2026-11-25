@@ -225,6 +225,12 @@ a.cartel:hover { transform: rotate(-1.5deg) scale(1.03); }
 .tabla a, .panel a, .ficha a { font-weight: 700; text-decoration: underline; }
 .tabla a:hover, .panel a:hover, .ficha a:hover { color: var(--rojo); }
 
+/* Operaciones con transacción (página 10) */
+.aviso-error { background: #f6c9c5; border-left-color: var(--rojo); color: var(--tinta); }
+.panel p { margin: .3rem 0 .8rem; }
+.form-linea { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+.form-linea .opcion { display: flex; align-items: center; gap: .4rem; font-weight: 700; }
+
 @media (max-width: 600px) {
     .titulo { font-size: 2.2rem; }
 }

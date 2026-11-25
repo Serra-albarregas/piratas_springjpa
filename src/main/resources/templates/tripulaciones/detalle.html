@@ -8,6 +8,9 @@
     <h1 class="titulo" th:text="${tripulacion.nombre}">Tripulación</h1>
     <p class="subtitulo" th:if="${tripulacion.descripcion != null}" th:text="${tripulacion.descripcion}">Descripción</p>
 
+    <p class="aviso" th:if="${mensaje}" th:text="${mensaje}"></p>
+    <p class="aviso aviso-error" th:if="${error}" th:text="${error}"></p>
+
     <div class="paneles">
         <section class="panel">
             <h2>Piratas (<span th:text="${#lists.size(tripulacion.piratas)}">0</span>)</h2>
@@ -30,6 +33,34 @@
                 </li>
             </ul>
             <p th:if="${tripulacion.territorios.isEmpty()}">No domina ningún territorio.</p>
+        </section>
+    </div>
+
+    <!-- Operaciones del servicio con @Transactional (teoría, página 10) -->
+    <div class="paneles">
+        <section class="panel">
+            <h2>Subir recompensa</h2>
+            <p>Suma una cantidad a la recompensa de todos sus piratas: un UPDATE masivo (@Modifying)
+               dentro de una transacción abierta en el servicio.</p>
+            <form class="form-linea" method="post" th:action="@{/tripulaciones/{id}/recompensa(id=${tripulacion.id})}">
+                <input type="number" name="incremento" min="1" step="1000" value="1000" required>
+                <button class="boton" type="submit">Subir</button>
+            </form>
+        </section>
+
+        <section class="panel">
+            <h2>Fusionar con otra tripulación</h2>
+            <p>Pasa sus piratas y territorios a otra tripulación y borra esta. Son varios pasos:
+               o se hacen todos, o no se hace ninguno (commit o rollback).</p>
+            <form class="form-linea" method="post" th:action="@{/tripulaciones/{id}/fusionar(id=${tripulacion.id})}">
+                <select name="destinoId" required>
+                    <option th:each="o : ${otras}" th:value="${o.id}" th:text="${o.nombre}"></option>
+                </select>
+                <label class="opcion">
+                    <input type="checkbox" name="simularFallo" value="true"> Simular un fallo a mitad
+                </label>
+                <button class="boton" type="submit">Fusionar</button>
+            </form>
         </section>
     </div>
 
